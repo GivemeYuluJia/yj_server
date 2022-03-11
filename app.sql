@@ -39,6 +39,30 @@
             `userId` int not null comment '用户id',
             primary key(`id`)
         ) engine=InnoDB auto_increment=1 default charset=utf8 comment='用户标签表';
+
+        -- 用户学期表
+        create table `schoolterm` (
+            `id` int not null auto_increment,
+            `createTime` timestamp default null comment '开始时间',
+            `endTime` timestamp default null comment '结束时间',
+            `term` int not null comment '学期',
+            `userId` int not null comment '用户id',
+            `schoolId` int not null comment '校园id',
+            `title` varchar(20) default null comment '标题',
+            primary key(`id`)
+        ) engine=InnoDB auto_increment=1 default charset=utf8 comment='用户校园学期表';
+
+        -- 用户成绩表
+        create table `userscore` (
+            `id` int not null auto_increment,
+            `name` varchar(30) default null comment '课程名',
+            `type` varchar(30) default null comment '课程类型',
+            `credit` float not null comment '学分',
+            `score` varchar(20) not null comment '成绩',
+            `createTime` timestamp default null comment '创建时间',
+            `connectId` int not null comment '连接学期表id',
+            primary key(`id`)
+        ) engine=InnoDB auto_increment=1 default charset=utf8 comment='用户校园成绩表';
     -- 查看表
         show table
 

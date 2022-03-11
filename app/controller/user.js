@@ -5,12 +5,12 @@ const BaseController = require('./base');
 
 class UserController extends BaseController {
   // token 签名
-  async jwtSign() {
+  async jwtSign({ id, accountId }) {
     const { ctx, app } = this;
     // const accountId = ctx.request.body.accountId;
     // ctx 上面自己添加扩展函数
-    const accountId = ctx.params('accountId');
     const token = app.jwt.sign({
+      id,
       accountId,
     }, app.config.jwt.secret);
     await app.redis.set(accountId, token, 'EX', app.config.redisExpire);
@@ -50,7 +50,10 @@ class UserController extends BaseController {
     const user = await ctx.service.user.getUser(accountId, password);
     console.log('user', 'nnn');
     if (user) {
-      const token = await this.jwtSign();
+      const token = await this.jwtSign({
+        id: user.id,
+        accountId: user.accountId,
+      });
       // const un = this.app.jwt.verify(token, this.app.config.jwt.secret);
       // console.log(un, 'yy');
       this.success({

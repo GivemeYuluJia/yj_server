@@ -15,4 +15,7 @@ module.exports = app => {
   router.post('/api2/user/getCurrentUser', controller.user.getCurrentUser);
   router.post('/api2/user/logout', controller.user.logout);
   router.post('/api2/user/editCurrentUserInfo', controller.user.editCurrentUserInfo);
+
+  // 成绩查询
+  router.post('/api2/score/getSchoolScore', controller.score.getSchoolScore);
 };
