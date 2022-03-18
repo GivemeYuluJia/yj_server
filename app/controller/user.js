@@ -3,6 +3,14 @@
 const Controller = require('egg').Controller;
 const BaseController = require('./base');
 
+const path = require('path');
+// node.js 文件操作对象
+const fs = require('fs');
+// 故名思意 异步二进制 写入流
+const awaitWriteStream = require('await-stream-ready').write;
+// 管道读入一个虫洞。
+const sendToWormhole = require('stream-wormhole');
+const md5 = require('md5');
 class UserController extends BaseController {
   // token 签名
   async jwtSign({ id, accountId }) {
@@ -93,11 +101,85 @@ class UserController extends BaseController {
   // 5.编辑用户
   async editCurrentUserInfo() {
     const { ctx } = this;
+    const params = ctx.request.body;
+    const province = params.geographic.province.label;
+    const provinceKey = params.geographic.province.key;
+    const city = params.geographic.city.label;
+    const cityKey = params.geographic.city.key;
+    delete params.geographic;
     const result = await ctx.service.user.editUser({
-      ...ctx.prarms(),
+      ...params,
+      province,
+      provinceKey,
+      city,
+      cityKey,
       updateTime: ctx.helper.time(),
     });
-    this.seccess(result);
+    this.success({
+      data: '修改成功',
+    });
+  }
+
+  // 6.新增用户标签
+  async addUserTags() {
+    const { ctx } = this;
+    // const params = ctx.request.body;
+    const params = {
+      ...ctx.params(),
+      userId: ctx.id,
+    };
+    // ctx.body = params;
+    const result = await ctx.service.user.addTags({
+      ...params,
+    });
+    if (result) {
+      this.success({
+        data: '添加成功',
+      });
+    } else {
+      this.error('添加失败');
+    }
+  }
+
+  // 修改头像
+  async updateAvatar() {
+    const { ctx, app } = this;
+    // const file = ctx.request.files[0];
+    const user = await ctx.service.user.getUser(ctx.accountId);
+    if (user) {
+      const stream = await ctx.getFileStream();
+      // stream.fields拿到传过来的另外json
+      const filename = md5(stream.filename + new Date()) +
+        path.extname(stream.filename)// 取出后缀名.jpg
+          .toLocaleLowerCase();
+      // 文件生成绝对路径
+      const targetDir = path.join(this.config.baseDir, `app/public/avatars/${user.accountId}`);
+      // 查看文件夹是否存在不存在就生成
+      await ctx.helper.tools.exitsFolderAsync(targetDir);
+      const target = path.join(targetDir, filename);
+      // 生成一个文件写入 文件流
+      const writeStream = fs.createWriteStream(target);
+      try {
+        // 异步把文件流 写入
+        await awaitWriteStream(stream.pipe(writeStream));
+      } catch (err) {
+        // 如果出现错误，关闭管道
+        await sendToWormhole(stream);
+        throw err;
+      }
+      await ctx.service.user.updateAvatar({
+        id: user.id,
+        accountId: user.accountId,
+        filename,
+      });
+      this.success({
+        url: `/public/avatars/${user.accountId}/` + filename,
+        msg: 'ok',
+      });
+      console.log(filename, targetDir, target);
+    } else {
+      this.error('用户未登录');
+    }
   }
 }
 

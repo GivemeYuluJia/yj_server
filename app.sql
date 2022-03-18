@@ -63,6 +63,39 @@
             `connectId` int not null comment '连接学期表id',
             primary key(`id`)
         ) engine=InnoDB auto_increment=1 default charset=utf8 comment='用户校园成绩表';
+
+        -- 校园卡订单表
+        create table `campusCardOrders` (
+            `id` int not null auto_increment,
+            `order_number` varchar(20) default null comment '订单编号',
+            `userId` int not null comment '用户id',
+            `schoolId` int not null comment '校园id',
+            `isPayed` int default 0 comment '是否支付 0未支付 | 1已支付',
+            `payMoney` int not null comment '支付金额',
+            `createTime` timestamp default null comment '创建时间',
+            `updateTime` timestamp default null comment '更新时间',
+            primary key(`id`)
+        )engine=InnoDB auto_increment=1 default charset=utf8 comment='校园卡订单表';
+
+        create table `outgoingForm` (
+            `id` int not null auto_increment,
+            `formNumber` varchar(20) default null comment '外出单编号',
+            `userId` int not null comment '用户id',
+            `schoolId` int not null comment '校园id',
+            `professionalGrade` varchar(30) not null comment '年级专业',
+            `phone` varchar(20) default null comment '电话',
+            `result` varchar(200) default null comment '外出事由',
+            `province` varchar(20) default null comment '省会',
+            `provinceKey` varchar(20) default null comment '省会key',
+            `city` varchar(20) default null comment '城市',
+            `cityKey` varchar(20) default null comment '城市key',
+            `address` varchar(20) default null comment '地址',
+            `state` int default 0 comment '请假单状态 是否支付 -1已撤销 | 2已发送 | 3审批中 4审批通过',
+            `startAt` timestamp default null comment '开始时间',
+            `endAt` timestamp default null comment '结束时间',
+            `createTime` timestamp default null comment '创建时间',
+            primary key(`id`)
+        )engine=InnoDB auto_increment=1 default charset=utf8 comment='外出请假单表';
     -- 查看表
         show table
 

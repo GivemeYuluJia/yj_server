@@ -49,6 +49,36 @@ class UserService extends BaseService {
       return result;
     });
   }
+
+  // 新增用户标签
+  async addTags(params) {
+    try {
+      const { ctx } = this;
+      const result = await ctx.model.Usertag.create(params);
+      return result;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  // 修改头像
+  async updateAvatar(params) {
+    const { ctx } = this;
+    try {
+      const res = await ctx.model.User.update({ avatar: `/public/avatars/${params.accountId}/` + params.filename }, {
+        where: {
+          id: params.id,
+          accountId: params.accountId,
+        },
+      });
+      return res;
+    } catch (error) {
+      console.log(error);
+      return;
+    }
+
+  }
 }
 
 module.exports = UserService;
